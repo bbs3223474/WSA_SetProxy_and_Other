@@ -32,16 +32,19 @@ cls
 echo 若WSA版本小于等于2204.40000.3.0，希望开启代理，输入1；
 echo 若WSA版本大于等于2204.40000.19.0，希望开启代理，输入2；
 echo 若需要清除代理设置，输入3（否则在不开启代理软件时，将无法正常上网）；
-echo 若需要解决“VirtWifi无法连接互联网”问题，输入4
+echo 若需要解决“VirtWifi连接受限”问题，输入4
+echo 若需要解决“VirtWifi连接受限”问题（暴力方案），输入5
 set /p selection=
 if %selection% == 1 goto a11
 if %selection% == 2 goto a12
 if %selection% == 3 goto clearproxy
 if %selection% == 4 goto setcaptive
+if %selection% == 5 goto disablecaptive
 if "%selection%" neq 1 (
 if "%selection%" neq 2 (
 if "%selection%" neq 3 (
-if "%selection%" neq 4 goto :invalid2)))
+if "%selection%" neq 4 (
+if "%selection%" neq 5 goto :invalid2))))
 
 :a11
 cls
@@ -52,11 +55,6 @@ adb shell settings get global http_proxy
 
 echo 请确保已出现IP地址和代理端口，否则请检查输入内容是否有误
 goto :end
-
-:invalid2
-echo 请输入正确的数字！
-pause
-goto selectmode
 
 :a12
 cls
@@ -80,7 +78,7 @@ goto :end
 
 :setcaptive
 cls
-echo 即将开始修复“无法连接互联网”提示
+echo 即将开始修复“连接受限”提示
 ping /n 2 127.0.0.1 >nul
 echo 正在修复......
 adb shell "settings put global captive_portal_http_url http://connect.rom.miui.com/generate_204"
@@ -88,6 +86,26 @@ adb shell "settings put global captive_portal_https_url https://connect.rom.miui
 adb shell "settings get global captive_portal_http_url"
 adb shell "settings get global captive_portal_https_url"
 echo 请确保已出现两行generate_204网址，重启WSA后，无法连接的提示即可消失
+goto :end
+
+:disablecaptive
+cls
+echo 即将开始修复“连接受限”提示（暴力方案）
+echo 本方案将彻底关闭Captive Portal检测功能
+echo 即便主机没有联网，也无法检测并给出任何提示，仅适合基础方案无效的用户
+echo 若要继续，请输入1，否则请输入2回到主菜单：
+set /p disable=
+if %disable% == 1 goto :confirm
+if %disable% == 2 goto :selectmode
+if "%disable%" neq 1 (
+if "%disable%" neq 2 goto :invalid2)
+
+:confirm
+echo 正在修复......
+adb shell "settings put global captive_portal_mode 0"
+adb shell "settings get global captive_portal_mode"
+
+echo 请确保已出现数字0，即代表修复成功
 goto :end
 
 :end

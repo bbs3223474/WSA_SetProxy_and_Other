@@ -105,7 +105,7 @@ echo 正在修复......
 adb shell "settings put global captive_portal_mode 0"
 adb shell "settings get global captive_portal_mode"
 
-echo 请确保已出现数字0，即代表修复成功
+echo 请确保已出现数字0，即代表修复成功，重启WSA后生效
 goto :end
 
 :end
